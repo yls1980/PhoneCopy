@@ -30,13 +30,13 @@
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="12"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
             <Grid Grid.Column="0">
-                <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
                 <TextBlock Text="USB-УСТРОЙСТВО" FontWeight="Bold" Foreground="#2767C7" Margin="0,0,0,7"/>
                 <DockPanel Grid.Row="1" Margin="0,0,0,7">
                     <Button x:Name="PhoneUpButton" DockPanel.Dock="Left" Content="↑" Click="PhoneUpButton_Click"/>
                     <TextBlock x:Name="PhonePathText" Text="Выберите устройство" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                 </DockPanel>
-                <ListView x:Name="PhoneList" Grid.Row="2" SelectionMode="Extended" MouseDoubleClick="PhoneList_MouseDoubleClick" KeyDown="PhoneList_KeyDown"
+                <ListView x:Name="PhoneList" Grid.Row="2" SelectionMode="Extended" SelectionChanged="PhoneList_SelectionChanged" MouseDoubleClick="PhoneList_MouseDoubleClick" KeyDown="PhoneList_KeyDown"
                           GridViewColumnHeader.Click="PhoneHeader_Click">
                     <ListView.View><GridView>
                         <GridViewColumn Header="Имя" Width="265" DisplayMemberBinding="{Binding DisplayName}"/>
@@ -44,16 +44,17 @@
                         <GridViewColumn Header="Изменён" Width="130" DisplayMemberBinding="{Binding DisplayDate}"/>
                     </GridView></ListView.View>
                 </ListView>
+                <TextBlock x:Name="PhoneSelectionText" Grid.Row="3" Text="Выбрано файлов: 0" Margin="0,5,0,0" Foreground="#536173"/>
             </Grid>
             <Grid Grid.Column="2">
-                <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
                 <TextBlock Text="КОМПЬЮТЕР" FontWeight="Bold" Foreground="#27865A" Margin="0,0,0,7"/>
                 <DockPanel Grid.Row="1" Margin="0,0,0,7">
                     <Button x:Name="PcUpButton" DockPanel.Dock="Left" Content="↑" Click="PcUpButton_Click"/>
                     <Button x:Name="PcChooseButton" DockPanel.Dock="Right" Content="Выбрать папку…" Click="PcChooseButton_Click" Margin="8,0,0,0"/>
                     <TextBlock x:Name="PcPathText" Text="Этот компьютер" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                 </DockPanel>
-                <ListView x:Name="PcList" Grid.Row="2" SelectionMode="Extended" MouseDoubleClick="PcList_MouseDoubleClick" KeyDown="PcList_KeyDown"
+                <ListView x:Name="PcList" Grid.Row="2" SelectionMode="Extended" SelectionChanged="PcList_SelectionChanged" MouseDoubleClick="PcList_MouseDoubleClick" KeyDown="PcList_KeyDown"
                           GridViewColumnHeader.Click="PcHeader_Click">
                     <ListView.View><GridView>
                         <GridViewColumn Header="Имя" Width="265" DisplayMemberBinding="{Binding DisplayName}"/>
@@ -61,6 +62,7 @@
                         <GridViewColumn Header="Изменён" Width="130" DisplayMemberBinding="{Binding DisplayDate}"/>
                     </GridView></ListView.View>
                 </ListView>
+                <TextBlock x:Name="PcSelectionText" Grid.Row="3" Text="Выбрано файлов: 0" Margin="0,5,0,0" Foreground="#536173"/>
             </Grid>
         </Grid>
         <StackPanel Grid.Row="3" Margin="0,13,0,0">

@@ -58,12 +58,12 @@ if (args.Contains("--local-device-smoke"))
         File.WriteAllText(original, "camera-video");
         var folderItem = new BrowserItem("Camera", cameraFolder, true, null, null);
         var copied = LocalTransferService.Copy(new[] { folderItem }, pcFolder, false, CancellationToken.None, progress);
-        Require(copied.Copied == 1 && copied.FilesFinished == 1 && copied.Errors.Count == 0 &&
+        Require(copied.Copied == 1 && copied.FilesFinished == 1 && copied.FilesCopied == 1 && copied.Errors.Count == 0 &&
             File.ReadAllText(Path.Combine(pcFolder, "Camera", "clip.mp4")) == "camera-video" && File.Exists(original),
             "Копирование папки камеры завершилось неверно.");
 
         var skipped = LocalTransferService.Copy(new[] { folderItem }, pcFolder, false, CancellationToken.None, progress);
-        Require(skipped.Skipped == 1 && skipped.FilesFinished == 1 && skipped.Errors.Count == 0,
+        Require(skipped.Skipped == 1 && skipped.FilesFinished == 1 && skipped.FilesCopied == 0 && skipped.Errors.Count == 0,
             "Совпадающий файл не был пропущен.");
 
         string moving = Path.Combine(deviceFolder, "replace.mp4");
@@ -72,7 +72,7 @@ if (args.Contains("--local-device-smoke"))
         File.WriteAllText(destination, "old-video");
         var moved = LocalTransferService.Move(new[] { new BrowserItem("replace.mp4", moving, false, 9, null) }, pcFolder,
             (_, _) => ConflictChoice.Replace, CancellationToken.None, progress);
-        Require(moved.Copied == 1 && moved.FilesFinished == 1 && moved.Errors.Count == 0 &&
+        Require(moved.Copied == 1 && moved.FilesFinished == 1 && moved.FilesCopied == 1 && moved.Errors.Count == 0 &&
             !File.Exists(moving) && File.ReadAllText(destination) == "new-video",
             "Перенос с заменой завершился неверно.");
 
@@ -109,9 +109,9 @@ if (args.Contains("--count-smoke"))
         Require(TransferCounter.CountPcFiles(selected, CancellationToken.None) == 3, "Вложенные файлы подсчитаны неверно.");
         var report = new TransferReport();
         var progress = new Progress<TransferProgress>(_ => { });
-        TransferService.ReportFileFinished(progress, first, report);
+        TransferService.ReportFileFinished(progress, first, report, true);
         TransferService.ReportFileFinished(progress, second, report);
-        Require(report.FilesFinished == 2, "Завершённые файлы подсчитаны неверно.");
+        Require(report.FilesFinished == 2 && report.FilesCopied == 1, "Завершённые и скопированные файлы подсчитаны неверно.");
         Console.WriteLine("PASS: три файла во вложенной папке; два завершённых файла.");
     }
     finally

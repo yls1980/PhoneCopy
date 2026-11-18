@@ -119,9 +119,10 @@ internal static class AdbTransferService
 
     private static async Task TryItemAsync(Func<Task> action, string path, bool isFile, TransferReport report, IProgress<TransferProgress> progress)
     {
+        int copiedBefore = report.Copied;
         try { await action(); }
         catch (OperationCanceledException) { throw; }
         catch (Exception error) { report.Errors.Add(path + ": " + error.Message); }
-        if (isFile) TransferService.ReportFileFinished(progress, path, report);
+        if (isFile) TransferService.ReportFileFinished(progress, path, report, report.Copied > copiedBefore);
     }
 }

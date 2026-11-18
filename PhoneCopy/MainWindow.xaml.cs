@@ -21,6 +21,7 @@ public partial class MainWindow : Window
     private bool currentOperationMove;
     private long? totalFiles;
     private long filesFinished;
+    private long filesCopied;
 
     public MainWindow() => InitializeComponent();
 
@@ -118,6 +119,26 @@ public partial class MainWindow : Window
 
     private void RenderPhone() => PhoneList.ItemsSource = Sorted(phoneItems, phoneSort, phoneDescending).ToArray();
     private void RenderPc() => PcList.ItemsSource = Sorted(pcItems, pcSort, pcDescending).ToArray();
+
+    private static string SelectionSummary(System.Windows.Controls.ListView list)
+    {
+        int files = 0;
+        int folders = 0;
+        foreach (BrowserItem item in list.SelectedItems)
+            if (item.IsDirectory) folders++;
+            else files++;
+        return $"Выбрано файлов: {files:N0}" + (folders > 0 ? $"  •  папок: {folders:N0}" : "");
+    }
+
+    private void PhoneList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (PhoneSelectionText is not null) PhoneSelectionText.Text = SelectionSummary(PhoneList);
+    }
+
+    private void PcList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (PcSelectionText is not null) PcSelectionText.Text = SelectionSummary(PcList);
+    }
 
     private void SetBusy(bool value)
     {
@@ -342,9 +363,10 @@ public partial class MainWindow : Window
 
     private void UpdateRemainingText()
     {
+        string verb = currentOperationMove ? "Перенесено" : "Скопировано";
         FilesRemainingText.Text = totalFiles is long total
-            ? $"Обработано файлов: {filesFinished:N0} из {total:N0}  •  осталось в очереди: {Math.Max(0, total - filesFinished):N0}"
-            : $"Обработано файлов: {filesFinished:N0}  •  осталось в очереди: неизвестно";
+            ? $"{verb} файлов: {filesCopied:N0} из {total:N0}  •  обработано: {filesFinished:N0}  •  осталось в очереди: {Math.Max(0, total - filesFinished):N0}"
+            : $"{verb} файлов: {filesCopied:N0}  •  обработано: {filesFinished:N0}  •  осталось в очереди: неизвестно";
     }
 
     private async Task TransferAsync(Func<CancellationToken, Task<long>> countFiles, Func<Task<TransferReport>> transfer, bool adb, bool move = false)
@@ -354,6 +376,7 @@ public partial class MainWindow : Window
         currentOperationMove = move;
         totalFiles = null;
         filesFinished = 0;
+        filesCopied = 0;
         SetBusy(true);
         ErrorsText.Text = "";
         FileProgress.Value = 0;
@@ -371,8 +394,11 @@ public partial class MainWindow : Window
             StatusText.Text = move ? "Перенос…" : "Копирование…";
             var report = await transfer();
             filesFinished = Math.Max(filesFinished, report.FilesFinished);
+            filesCopied = Math.Max(filesCopied, report.FilesCopied);
             UpdateRemainingText();
-            StatusText.Text = $"{(report.Errors.Count == 0 ? "Готово" : "Завершено с ошибками")}: {(move ? "перенесено" : "скопировано")} {report.Copied}, пропущено {report.Skipped}, ошибок {report.Errors.Count}.";
+            StatusText.Text = $"{(report.Errors.Count == 0 ? "Готово" : "Завершено с ошибками")}: {(move ? "перенесено" : "скопировано")} файлов {report.FilesCopied:N0}" +
+                              (totalFiles is long total ? $" из {total:N0}" : "") +
+                              $", пропущено {report.Skipped:N0}, ошибок {report.Errors.Count:N0}.";
             string countWarning = totalFiles is null ? ErrorsText.Text : "";
             ErrorsText.Text = countWarning + (countWarning.Length > 0 && report.Errors.Count > 0 ? Environment.NewLine : "") + string.Join(Environment.NewLine, report.Errors.Take(3));
             if (report.Errors.Count > 0)
@@ -408,11 +434,13 @@ public partial class MainWindow : Window
         if (p.FileFinished)
         {
             filesFinished = Math.Max(filesFinished, p.FilesFinished);
+            filesCopied = Math.Max(filesCopied, p.FilesCopied);
             UpdateRemainingText();
             return;
         }
+        string copiedCount = totalFiles is long totalFilesValue ? $"{filesCopied:N0} из {totalFilesValue:N0}" : $"{filesCopied:N0}";
         StatusText.Text = $"{p.Name} — {p.Done:N0}" + (p.Total is long total ? $" / {total:N0} Б" : " Б") +
-                          $"  •  {(currentOperationMove ? "перенесено" : "скопировано")} {p.Copied}, пропущено {p.Skipped}";
+                          $"  •  {(currentOperationMove ? "перенесено" : "скопировано")} файлов {copiedCount}, пропущено {p.Skipped:N0}";
         FileProgress.Value = p.Total is > 0 ? Math.Min(100, 100.0 * p.Done / p.Total.Value) : 0;
     }
 

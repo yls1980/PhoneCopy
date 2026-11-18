@@ -4,13 +4,14 @@ using System.Runtime.InteropServices;
 
 namespace PhoneCopy;
 
-internal sealed record TransferProgress(string Name, long Done, long? Total, int Copied, int Skipped, bool FileFinished = false, long FilesFinished = 0);
+internal sealed record TransferProgress(string Name, long Done, long? Total, int Copied, int Skipped, bool FileFinished = false, long FilesFinished = 0, long FilesCopied = 0);
 
 internal sealed class TransferReport
 {
     public int Copied { get; set; }
     public int Skipped { get; set; }
     public long FilesFinished { get; set; }
+    public long FilesCopied { get; set; }
     public List<string> Errors { get; } = new();
 }
 
@@ -146,6 +147,7 @@ internal static class TransferService
 
     private static void TryItem(Action action, string path, bool isFile, TransferReport report, IProgress<TransferProgress> progress)
     {
+        int copiedBefore = report.Copied;
         try { action(); }
         catch (OperationCanceledException) { throw; }
         catch (Exception error)
@@ -155,13 +157,14 @@ internal static class TransferService
                 : error.Message;
             report.Errors.Add(path + ": " + message);
         }
-        if (isFile) ReportFileFinished(progress, path, report);
+        if (isFile) ReportFileFinished(progress, path, report, report.Copied > copiedBefore);
     }
 
-    internal static void ReportFileFinished(IProgress<TransferProgress> progress, string path, TransferReport report)
+    internal static void ReportFileFinished(IProgress<TransferProgress> progress, string path, TransferReport report, bool copied = false)
     {
         report.FilesFinished++;
-        progress.Report(new TransferProgress(Path.GetFileName(path.TrimEnd('\\', '/')), 0, null, report.Copied, report.Skipped, true, report.FilesFinished));
+        if (copied) report.FilesCopied++;
+        progress.Report(new TransferProgress(Path.GetFileName(path.TrimEnd('\\', '/')), 0, null, report.Copied, report.Skipped, true, report.FilesFinished, report.FilesCopied));
     }
 
     internal static Stream OpenPhoneFile(MediaDevice device, string path, CancellationToken token)
