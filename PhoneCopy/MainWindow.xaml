@@ -1,0 +1,87 @@
+<Window x:Class="PhoneCopy.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="PhoneCopy — USB-устройства ↔ Windows"
+        Width="1180" Height="730" MinWidth="850" MinHeight="570" Background="#F4F6FA"
+        FontFamily="Segoe UI" FontSize="13" Loaded="Window_Loaded">
+    <Window.Resources>
+        <Style TargetType="Button">
+            <Setter Property="Padding" Value="11,7"/>
+            <Setter Property="Margin" Value="0,0,8,0"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#C8D0DC"/>
+        </Style>
+        <Style TargetType="ListView"><Setter Property="Background" Value="White"/><Setter Property="BorderBrush" Value="#C8D0DC"/></Style>
+    </Window.Resources>
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Margin="0,0,0,13">
+            <TextBlock Text="PhoneCopy" FontSize="25" FontWeight="SemiBold" Foreground="#1F2937"/>
+            <TextBlock Text="Подключите телефон или камеру по USB и откройте доступ к файлам на устройстве. Отладка по USB не требуется. Двойной щелчок открывает папку; Ctrl/Shift выделяют строки; щелчок по заголовку сортирует."
+                       Foreground="#536173" TextWrapping="Wrap" Margin="0,3,0,0"/>
+        </StackPanel>
+        <Grid Grid.Row="1" Margin="0,0,0,12">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+            <TextBlock Text="USB-устройство" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="SemiBold"/>
+            <ComboBox x:Name="DevicesBox" Grid.Column="1" Height="34" DisplayMemberPath="Name" SelectionChanged="DevicesBox_SelectionChanged"/>
+            <Button x:Name="FindButton" Grid.Column="2" Content="Найти устройства" Margin="10,0,0,0" Click="FindButton_Click"/>
+            <Button x:Name="CameraFolderButton" Grid.Column="3" Content="Выбрать диск/папку…" Margin="2,0,0,0" Click="CameraFolderButton_Click"/>
+        </Grid>
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="12"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                <TextBlock Text="USB-УСТРОЙСТВО" FontWeight="Bold" Foreground="#2767C7" Margin="0,0,0,7"/>
+                <DockPanel Grid.Row="1" Margin="0,0,0,7">
+                    <Button x:Name="PhoneUpButton" DockPanel.Dock="Left" Content="↑" Click="PhoneUpButton_Click"/>
+                    <TextBlock x:Name="PhonePathText" Text="Выберите устройство" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                </DockPanel>
+                <ListView x:Name="PhoneList" Grid.Row="2" SelectionMode="Extended" MouseDoubleClick="PhoneList_MouseDoubleClick" KeyDown="PhoneList_KeyDown"
+                          GridViewColumnHeader.Click="PhoneHeader_Click">
+                    <ListView.View><GridView>
+                        <GridViewColumn Header="Имя" Width="265" DisplayMemberBinding="{Binding DisplayName}"/>
+                        <GridViewColumn Header="Размер" Width="95" DisplayMemberBinding="{Binding DisplaySize}"/>
+                        <GridViewColumn Header="Изменён" Width="130" DisplayMemberBinding="{Binding DisplayDate}"/>
+                    </GridView></ListView.View>
+                </ListView>
+            </Grid>
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                <TextBlock Text="КОМПЬЮТЕР" FontWeight="Bold" Foreground="#27865A" Margin="0,0,0,7"/>
+                <DockPanel Grid.Row="1" Margin="0,0,0,7">
+                    <Button x:Name="PcUpButton" DockPanel.Dock="Left" Content="↑" Click="PcUpButton_Click"/>
+                    <Button x:Name="PcChooseButton" DockPanel.Dock="Right" Content="Выбрать папку…" Click="PcChooseButton_Click" Margin="8,0,0,0"/>
+                    <TextBlock x:Name="PcPathText" Text="Этот компьютер" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                </DockPanel>
+                <ListView x:Name="PcList" Grid.Row="2" SelectionMode="Extended" MouseDoubleClick="PcList_MouseDoubleClick" KeyDown="PcList_KeyDown"
+                          GridViewColumnHeader.Click="PcHeader_Click">
+                    <ListView.View><GridView>
+                        <GridViewColumn Header="Имя" Width="265" DisplayMemberBinding="{Binding DisplayName}"/>
+                        <GridViewColumn Header="Размер" Width="95" DisplayMemberBinding="{Binding DisplaySize}"/>
+                        <GridViewColumn Header="Изменён" Width="130" DisplayMemberBinding="{Binding DisplayDate}"/>
+                    </GridView></ListView.View>
+                </ListView>
+            </Grid>
+        </Grid>
+        <StackPanel Grid.Row="3" Margin="0,13,0,0">
+            <StackPanel Orientation="Horizontal">
+                <Button x:Name="ToPcButton" Content="Копировать → на компьютер" Click="ToPcButton_Click" Background="#2767C7" Foreground="White" BorderBrush="#2767C7"/>
+                <Button x:Name="ToPhoneButton" Content="← Копировать на устройство" Click="ToPhoneButton_Click" Background="#27865A" Foreground="White" BorderBrush="#27865A"/>
+                <TextBlock Text="При совпадении имён:" VerticalAlignment="Center" Margin="15,0,8,0"/>
+                <ComboBox x:Name="ConflictBox" Width="210" SelectedIndex="0">
+                    <ComboBoxItem Content="Пропустить"/>
+                    <ComboBoxItem Content="Сохранить с номером"/>
+                </ComboBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                <Button x:Name="MoveToPcButton" Content="Перенести → на компьютер" Click="MoveToPcButton_Click"/>
+                <Button x:Name="MoveToPhoneButton" Content="← Перенести на устройство" Click="MoveToPhoneButton_Click"/>
+                <Button x:Name="CancelButton" Content="Отменить операцию" Click="CancelButton_Click" IsEnabled="False"/>
+            </StackPanel>
+            <TextBlock x:Name="FilesRemainingText" Text="" FontWeight="SemiBold" Margin="0,10,0,0" Visibility="Collapsed"/>
+            <ProgressBar x:Name="FileProgress" Height="8" Margin="0,7,0,0" Minimum="0" Maximum="100"/>
+            <TextBlock x:Name="StatusText" Text="Готово" Margin="0,6,0,0" TextWrapping="Wrap"/>
+            <TextBlock x:Name="ErrorsText" Foreground="#A32929" Margin="0,3,0,0" TextWrapping="Wrap" MaxHeight="50"/>
+        </StackPanel>
+    </Grid>
+</Window>

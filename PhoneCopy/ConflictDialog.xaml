@@ -1,0 +1,19 @@
+<Window x:Class="PhoneCopy.ConflictDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Файл уже существует" Width="570" Height="285" MinWidth="500" MinHeight="270"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize" Background="#F4F6FA" FontFamily="Segoe UI" FontSize="13">
+    <Grid Margin="20">
+        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+        <TextBlock Text="В целевой папке уже есть файл с таким именем" FontWeight="SemiBold" FontSize="17" TextWrapping="Wrap"/>
+        <TextBlock x:Name="SourceText" Grid.Row="1" TextWrapping="Wrap" Margin="0,12,0,0"/>
+        <TextBlock x:Name="TargetText" Grid.Row="2" TextWrapping="Wrap" Margin="0,6,0,0"/>
+        <CheckBox x:Name="ApplyAllBox" Grid.Row="3" Content="Применить выбор ко всем следующим совпадениям" VerticalAlignment="Bottom" Margin="0,10,0,12"/>
+        <WrapPanel Grid.Row="4" HorizontalAlignment="Right">
+            <Button Content="Заменить" Tag="Replace" Click="Choice_Click" Padding="12,7" Margin="0,0,7,0"/>
+            <Button Content="Сохранить оба" Tag="KeepBoth" Click="Choice_Click" Padding="12,7" Margin="0,0,7,0"/>
+            <Button Content="Пропустить" Tag="Skip" Click="Choice_Click" Padding="12,7" Margin="0,0,7,0"/>
+            <Button Content="Отменить" Tag="Cancel" Click="Choice_Click" Padding="12,7"/>
+        </WrapPanel>
+    </Grid>
+</Window>
